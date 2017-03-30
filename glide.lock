@@ -1,0 +1,20 @@
+hash: e1479ac96f1457eeaa17fee4543960daf514643210baf155af54a212db1cdde5
+updated: 2017-03-14T17:23:20.029207203+09:00
+imports:
+- name: github.com/CertiVox-i3-NTT/asn1-ber
+  version: 6e711e13cd78ccfd977a4df7dcc07fef250a5f8f
+  repo: git@github.com:CertiVox-i3-NTT/asn1-ber
+- name: github.com/CertiVox-i3-NTT/ldap
+  version: d82487b03544cd5e765b1d952aebdaaab25c24f5
+  repo: git@github.com:CertiVox-i3-NTT/ldap
+- name: github.com/mattn/go-colorable
+  version: 5411d3eea5978e6cdc258b30de592b60df6aba96
+- name: github.com/mattn/go-isatty
+  version: 281032e84ae07510239465db46bf442aa44b953a
+- name: github.com/mgutz/ansi
+  version: 9520e82c474b0a04dd04f8a40959027271bab992
+- name: golang.org/x/sys
+  version: e24f485414aeafb646f6fca458b0bf869c0880a1
+  subpackages:
+  - unix
+testImports: []

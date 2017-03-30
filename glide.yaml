@@ -1,0 +1,8 @@
+package: .
+import:
+- package: github.com/CertiVox-i3-NTT/asn1-ber
+  repo: git@github.com:CertiVox-i3-NTT/asn1-ber
+  version: for-ldap-adapter
+- package: github.com/CertiVox-i3-NTT/ldap
+  repo: git@github.com:CertiVox-i3-NTT/ldap
+  version: for-ldap-adapter

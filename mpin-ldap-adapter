@@ -1,0 +1,141 @@
+#!/bin/sh
+# chkconfig: 2345 80 20
+# description: mpin ldap-adapter start/stop script
+# processname: mpin-ldap-adapter
+#
+# Instalation:
+# copy file to /etc/init.d
+# chmod +x /etc/init.d/mpin-ldap-adapter
+# chkconfig --add /etc/init.d/mpin-ldap-adapter
+# chkconfig mpin-ldap-adapter on
+#
+# Usage: (as root)
+# service mpin-ldap-adapter start
+# service mpin-ldap-adapter stop
+# service mpin-ldap-adapter restart
+
+## ldap-adapter
+BINARY_PATH="/opt/src/LDAP-adapter/ldap-adapter"
+
+## ldap-adapter option
+ATTRIBUTE_NAME="userPrincipalName"
+BASE_DN=""
+BIND_DN=""
+BIND_PWD=""
+BIND_PWD_FILE=""
+PUBLIC_CERTIFICATE="/etc/ssl/certs/ssl-cert-snakeoil.pem"
+FORCE_MPIN_AUTH=False
+CERTIFICATE_KEY="/etc/ssl/private/ssl-cert-snakeoil.key"
+LOCAL_HOSTNAME_PORT=":3389"
+MPIN_SERVER_URL="https://public.milagro.io/mpinAuthenticate"
+SERVER_NAME="ldap.example.com"
+REMOTE_HOSTNAME_PORT="localhost:389"
+ENABLE_TLS=False
+
+## Log level
+## Log Priority   ULTRA_VERVOSE_MODE > VERVOSE_MODE
+VERVOSE_MODE=False
+ULTRA_VERVOSE_MODE=False
+
+## Log output
+STDOUT_PATH="/opt/src/LDAP-adapter/nohup.out"
+
+# ldap-adapter go running option
+OPTIONS=""
+if [ -n "$ATTRIBUTE_NAME" ]; then
+    OPTIONS="${OPTIONS} -attributeName ${ATTRIBUTE_NAME}"
+fi
+if [ -n "$BASE_DN" ]; then
+    OPTIONS="${OPTIONS} -baseDN ${BASE_DN}"
+fi
+if [ -n "$BIND_DN" ]; then
+    OPTIONS="${OPTIONS} -bindDN ${BIND_DN}"
+fi
+if [ -n "$BIND_PWD" ]; then
+    OPTIONS="${OPTIONS} -bindPWD ${BIND_PWD}"
+fi
+if [ -n "$BIND_PWD_FILE" ]; then
+    OPTIONS="${OPTIONS} -bindPWDFile ${BIND_PWD_FILE}"
+fi
+if [ -n "$PUBLIC_CERTIFICATE" ]; then
+    OPTIONS="${OPTIONS} -cert ${PUBLIC_CERTIFICATE}"
+fi
+if [ $FORCE_MPIN_AUTH = "True" ]; then
+    OPTIONS="${OPTIONS} -f"
+fi
+if [ -n "$CERTIFICATE_KEY" ]; then
+    OPTIONS="${OPTIONS} -key ${CERTIFICATE_KEY}"
+fi
+if [ -n "$LOCAL_HOSTNAME_PORT" ]; then
+    OPTIONS="${OPTIONS} -l ${LOCAL_HOSTNAME_PORT}"
+fi
+if [ -n "$MPIN_SERVER_URL" ]; then
+    OPTIONS="${OPTIONS} -m ${MPIN_SERVER_URL}"
+fi
+if [ -n "$SERVER_NAME" ]; then
+    OPTIONS="${OPTIONS} -n ${SERVER_NAME}"
+fi
+if [ -n "$REMOTE_HOSTNAME_PORT" ]; then
+    OPTIONS="${OPTIONS} -r ${REMOTE_HOSTNAME_PORT}"
+fi
+if [ $ENABLE_TLS = "True" ]; then
+    OPTIONS="${OPTIONS} -s"
+fi
+if [ $ULTRA_VERVOSE_MODE = "True" ]; then
+    OPTIONS="${OPTIONS} -vv"
+fi
+if [ $VERVOSE_MODE = "True" ]; then
+    OPTIONS="${OPTIONS} -v"
+fi
+
+# User running the Play process
+USER="ansible"
+
+# source function library
+. /etc/init.d/functions
+RETVAL=0
+
+start() {
+        echo -n "Starting ldap-adapter service: "
+        su -s /bin/sh $USER -c "nohup $BINARY_PATH $OPTIONS > $STDOUT_PATH 2>&1 &"
+        RETVAL=$?
+
+        if [ $RETVAL -eq 0 ]; then
+                echo_success
+        else
+                echo_failure
+        fi
+        echo
+}
+stop() {
+        echo -n "Shutting down ldap-adapter service: "
+        RETVAL=$?
+        pids=$(ps aux | grep ldap-adapter | grep -v '/bin/sh' | grep -vw grep | awk '{ print $2 }')
+        for pid in ${pids[*]}
+        do
+                kill -9 ${pid}
+        done
+        RETVAL=$?
+        if [ $RETVAL -eq 0 ]; then
+                echo_success
+        else
+                echo_failure
+        fi
+        echo
+}
+case "$1" in
+        start)
+        start
+        ;;
+        stop)
+        stop
+        ;;
+        restart|reload)
+        stop
+        sleep 10
+        start
+        ;;
+        *)
+        echo "Usage: $0 {start|stop|restart}"
+esac
+exit 0
